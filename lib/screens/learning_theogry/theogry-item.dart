@@ -1,21 +1,67 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:gplx/data/helper/database_helper.dart';
+import 'package:gplx/data/models/question.dart';
+import 'package:gplx/screens/learning_theogry/doing_question_practice.dart';
 import 'package:gplx/services/asset_services.dart';
 import 'package:gplx/services/color_services.dart';
 
-class TheogryItem extends StatelessWidget {
+import '../../data/models/theogry_categories.dart';
+
+class TheogryItem extends StatefulWidget {
+  final TheogryCategories theogryCategories;
+
+  TheogryItem({super.key, required this.theogryCategories});
+
+  @override
+  State<TheogryItem> createState() => _TheogryItemState();
+}
+
+class _TheogryItemState extends State<TheogryItem> {
+  List<Question> _lstQuestions = [];
+
+  int _answeredQuestionCount = 0;
+
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
+    return FutureBuilder(
+      future: _getlstQuestionByTheogry(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          return _buildListItem(context);
+        } else {
+          return  Container();
+        }
+      },
+    );
+  }
+
+
+
+  Future<void> _getlstQuestionByTheogry() async {
+    _lstQuestions = await DatabaseHelper().getListQuestionByTypeQuestion(widget.theogryCategories.id);
+    _answeredQuestionCount = _lstQuestions.where((question) => question.isAnswered).length;
+  }
+
+  Widget _buildListItem(BuildContext context) {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 5),
       child: Card(
-        // elevation: 10,
         child: ListTile(
-          onTap: (){},
-          leading:
-              Image.asset(AssetServices.assetTheogryIconPngPath + 'sa_hinh.png'),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => DoingQuestionPractice(lstQuestions: _lstQuestions)),
+            ).then((_) {
+              setState(() {
+
+              });
+            });
+          },
+          leading: Image.asset(AssetServices.assetTheogryIconPngPath + widget.theogryCategories.photoName),
           title: Text(
-            "Khái niệm và quy tắc",
+            widget.theogryCategories.theogryName,
             style: TextStyle(fontSize: 22),
           ),
           subtitle: Column(
@@ -24,7 +70,7 @@ class TheogryItem extends StatelessWidget {
               Row(
                 children: [
                   Text(
-                    "gồm 83 câu hỏi",
+                    "gồm ${_lstQuestions.length} câu hỏi",
                     style: TextStyle(fontSize: 16),
                   ),
                   const SizedBox(
@@ -43,17 +89,17 @@ class TheogryItem extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
-                      flex: 4,
-                      child: const LinearProgressIndicator(
-                        backgroundColor: Colors.grey,
-                        valueColor:
-                            AlwaysStoppedAnimation(ColorServices.primaryColor),
-                        value: 60 / 80,
-                      )),
+                    flex: 4,
+                    child: LinearProgressIndicator(
+                      backgroundColor: Colors.grey,
+                      valueColor: AlwaysStoppedAnimation(ColorServices.primaryColor),
+                      value: _lstQuestions.isNotEmpty ? _answeredQuestionCount / _lstQuestions.length : 0,
+                    ),
+                  ),
                   const SizedBox(width: 10,),
                   Expanded(
-                    // flex: 1,
-                      child: Text("60/80"))
+                    child: Text("${_answeredQuestionCount}/${_lstQuestions.length}"),
+                  )
                 ],
               )
             ],
@@ -63,3 +109,5 @@ class TheogryItem extends StatelessWidget {
     );
   }
 }
+
+

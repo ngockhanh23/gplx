@@ -5,6 +5,8 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:flutter/services.dart' show ByteData, rootBundle;
 
+import '../models/question.dart';
+
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
 
@@ -47,4 +49,55 @@ class DatabaseHelper {
     return List.generate(
         maps.length, (index) => TheogryCategories.fromMap(maps[index]));
   }
+
+  Future<List<Question>> getListQuestionByTypeQuestion(int typeQuestion) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.rawQuery('SELECT * FROM Questions WHERE typeQuestion = ?', [typeQuestion]);
+
+    return List.generate(
+        maps.length,
+            (index) {
+          final map = maps[index];
+          return Question(
+            map['id'] ?? 0,
+            map['typeQuestion'] ?? 0,
+            map['content'] ?? '',
+            map['photo'] ?? '',
+            (map['failingGradeQuestion'] ?? 0) == 1,
+            map['option1'] ?? '',
+            map['option2'] ?? '',
+            map['option3'] ?? '',
+            map['option4'] ?? '',
+            map['correctOption'] ?? 0,
+            map['answerExplanation'] ?? '',
+            (map['isAnswered'] ?? 0) == 1,
+
+          );
+        }
+    );
+  }
+
+  Future<void> updateQuestionAnsweredStatus(int questionId) async {
+    final db = await database;
+    await db.update(
+      'Questions',
+      {'isAnswered': 1},
+      where: 'id = ?',
+      whereArgs: [questionId],
+    );
+  }
+
+
+  //reset tiến độ làm bài
+  Future<void> resetAllQuestionsAnsweredStatus() async {
+    final db = await database;
+    await db.update(
+      'Questions',
+      {'isAnswered': 0},
+    );
+  }
+
+
+
+
 }

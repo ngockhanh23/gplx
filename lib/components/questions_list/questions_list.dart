@@ -33,11 +33,11 @@ class _QuestionsListState extends State<QuestionsList> {
 
   _getListQuestionWidgets() {
     widget.questionsData.forEach((question) {
-      pages.add(QuestionDoingItem(question: question));
+      pages.add(QuestionDoingItem(question: question, showAnswer: widget.showAnswer,));
     });
   }
 
-  // Index của trang hiện tại
+
   int _currentPageIndex = 0;
   final PageController _pageController = PageController(keepPage: true);
 
@@ -143,13 +143,13 @@ class _QuestionsListState extends State<QuestionsList> {
               color: Colors.white,
             ),
           ),
-          // Biểu tượng dấu tick ở góc trên
+
           Positioned(
             top: 0,
             right: 0,
             child: Container(
-              width: 24, // Kích thước của hình tròn
-              height: 24, // Kích thước của hình tròn
+              width: 24,
+              height: 24,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: Color(0xFF007903),

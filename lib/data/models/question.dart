@@ -1,7 +1,5 @@
-
-class Question{
+class Question {
   int id;
-
   int typeQuestion;
   String content;
   String photo;
@@ -12,6 +10,7 @@ class Question{
   String option4;
   int correctOption;
   String answerExplanation;
+  bool isAnswered;
 
   Question(
       this.id,
@@ -24,6 +23,42 @@ class Question{
       this.option3,
       this.option4,
       this.correctOption,
-      this.answerExplanation);
+      this.answerExplanation,
+      this.isAnswered);
 
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'typeQuestion': typeQuestion,
+      'content': content,
+      'photo': photo,
+      'failingGradeQuestion': failingGradeQuestion ? 1 : 0,
+      'option1': option1,
+      'option2': option2,
+      'option3': option3,
+      'option4': option4,
+      'correctOption': correctOption,
+      'answerExplanation': answerExplanation,
+      'isAnswered': isAnswered ? 1 : 0,
+
+    };
+  }
+
+  static Question fromMap(Map<String, dynamic> map) {
+    return Question(
+      map['id'],
+      map['typeQuestion'],
+      map['content'],
+      map['photo'],
+      map['failingGradeQuestion'] == 1 ? true : false,
+      map['option1'],
+      map['option2'],
+      map['option3'],
+      map['option4'],
+      map['correctOption'],
+      map['answerExplanation'],
+      map['isAnswered'] == 1 ? true : false,
+
+    );
+  }
 }
