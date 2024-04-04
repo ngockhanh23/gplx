@@ -3,10 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:gplx/data/helper/database_helper.dart';
 import 'package:gplx/data/models/question.dart';
-import 'package:gplx/screens/learning_theogry/doing_question_practice.dart';
 import 'package:gplx/services/asset_services.dart';
 import 'package:gplx/services/color_services.dart';
+import 'package:gplx/services/enum/enum.dart';
 
+import '../../components/questions_list/questions_list.dart';
 import '../../data/models/theogry_categories.dart';
 
 class TheogryItem extends StatefulWidget {
@@ -22,6 +23,7 @@ class _TheogryItemState extends State<TheogryItem> {
   List<Question> _lstQuestions = [];
 
   int _answeredQuestionCount = 0;
+  int _fallingGradeQuestionCount = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +44,7 @@ class _TheogryItemState extends State<TheogryItem> {
   Future<void> _getlstQuestionByTheogry() async {
     _lstQuestions = await DatabaseHelper().getListQuestionByTypeQuestion(widget.theogryCategories.id);
     _answeredQuestionCount = _lstQuestions.where((question) => question.isAnswered).length;
+    _fallingGradeQuestionCount = _lstQuestions.where((question) => question.failingGradeQuestion).length;
   }
 
   Widget _buildListItem(BuildContext context) {
@@ -52,7 +55,7 @@ class _TheogryItemState extends State<TheogryItem> {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => DoingQuestionPractice(lstQuestions: _lstQuestions)),
+              MaterialPageRoute(builder: (context) => QuestionsListDoing(questionsData: _lstQuestions, mode: DoingQuestionMode.review)),
             ).then((_) {
               setState(() {
 
@@ -76,8 +79,9 @@ class _TheogryItemState extends State<TheogryItem> {
                   const SizedBox(
                     width: 10,
                   ),
+                  if(_fallingGradeQuestionCount!= 0)
                   Text(
-                    "(n câu điểm liệt)",
+                    "(${_fallingGradeQuestionCount} câu điểm liệt)",
                     style: TextStyle(fontSize: 16, color: Colors.deepOrange),
                   ),
                 ],

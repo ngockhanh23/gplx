@@ -2,19 +2,22 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gplx/data/helper/database_helper.dart';
 import 'package:gplx/services/color_services.dart';
+import 'package:gplx/services/enum/enum.dart';
 import '../../data/models/question.dart';
 import '../../services/asset_services.dart';
+
 
 class QuestionDoingItem extends StatefulWidget {
   Question question;
   int? choosedOption;
-  bool showAnswer;
+
+  DoingQuestionMode mode;
 
   QuestionDoingItem(
       {super.key,
       required this.question,
       this.choosedOption,
-      required this.showAnswer});
+      required this.mode});
 
   @override
   State<QuestionDoingItem> createState() => _QuestionDoingItemState();
@@ -31,7 +34,7 @@ class _QuestionDoingItemState extends State<QuestionDoingItem>
       DatabaseHelper().updateQuestionAnsweredStatus(widget.question.id);
     }
 
-   if(widget.showAnswer == true){
+   if(widget.mode == DoingQuestionMode.review){
      if(_seletedOption! == widget.question.correctOption)
        _showAnswerExplain = true;
      else
@@ -54,6 +57,11 @@ class _QuestionDoingItemState extends State<QuestionDoingItem>
             widget.question.content,
             style: TextStyle(fontSize: 25),
           ),
+          if(widget.question.failingGradeQuestion)
+            const Text(
+              'Đây là câu điểm liệt',
+              style: TextStyle(fontSize: 20, color: Colors.orange),
+            ),
           if (widget.question.photo.isNotEmpty)
             Container(
               decoration:
@@ -75,7 +83,7 @@ class _QuestionDoingItemState extends State<QuestionDoingItem>
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
-                  color: (widget.showAnswer && _seletedOption ==1) ? (_seletedOption == widget.question.correctOption ? Colors.greenAccent : Colors.redAccent) : Colors.transparent,
+                  color: (widget.mode == DoingQuestionMode.review && _seletedOption ==1) ? (_seletedOption == widget.question.correctOption ? Colors.greenAccent : Colors.redAccent) : Colors.transparent,
                   border: Border(
                     top: BorderSide(width: 0.5, color: Colors.black12),
                     bottom: BorderSide(width: 0.5, color: Colors.black12),
@@ -133,7 +141,7 @@ class _QuestionDoingItemState extends State<QuestionDoingItem>
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
-                  color: (widget.showAnswer && _seletedOption ==2) ? (_seletedOption == widget.question.correctOption ? Colors.greenAccent : Colors.redAccent) : Colors.transparent,
+                  color: (widget.mode == DoingQuestionMode.review && _seletedOption ==2) ? (_seletedOption == widget.question.correctOption ? Colors.greenAccent : Colors.redAccent) : Colors.transparent,
 
                   border: Border(
                     top: BorderSide(width: 0.5, color: Colors.black12),
@@ -191,7 +199,7 @@ class _QuestionDoingItemState extends State<QuestionDoingItem>
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
-                  color: (widget.showAnswer && _seletedOption ==3) ? (_seletedOption == widget.question.correctOption ? Colors.greenAccent : Colors.redAccent) : Colors.transparent,
+                  color: (widget.mode == DoingQuestionMode.review && _seletedOption ==3) ? (_seletedOption == widget.question.correctOption ? Colors.greenAccent : Colors.redAccent) : Colors.transparent,
 
                   border: Border(
                     top: BorderSide(width: 0.5, color: Colors.black12),
@@ -249,7 +257,7 @@ class _QuestionDoingItemState extends State<QuestionDoingItem>
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
-                  color: (widget.showAnswer && _seletedOption ==4) ? (_seletedOption == widget.question.correctOption ? Colors.greenAccent : Colors.redAccent) : Colors.transparent,
+                  color: (widget.mode == DoingQuestionMode.review && _seletedOption ==4) ? (_seletedOption == widget.question.correctOption ? Colors.greenAccent : Colors.redAccent) : Colors.transparent,
 
                   border: Border(
                     top: BorderSide(width: 0.5, color: Colors.black12),

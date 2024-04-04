@@ -5,46 +5,86 @@ import 'package:flutter/widgets.dart';
 import 'package:gplx/components/questions_list/question_doing_item.dart';
 import 'package:gplx/services/color_services.dart';
 
+import '../../data/helper/database_helper.dart';
 import '../../data/models/question.dart';
+import '../../services/enum/enum.dart';
 
-class QuestionsList extends StatefulWidget {
+class QuestionsListDoing extends StatefulWidget {
   List<Question> questionsData;
-  bool showAnswer;
+  DoingQuestionMode mode;
 
-  QuestionsList({
+  QuestionsListDoing({
     super.key,
     required this.questionsData,
-    required this.showAnswer,
+    required this.mode,
   });
 
   @override
-  State<QuestionsList> createState() => _QuestionsListState();
+  State<QuestionsListDoing> createState() => _QuestionsListDoingState();
 }
 
-class _QuestionsListState extends State<QuestionsList> {
+class _QuestionsListDoingState extends State<QuestionsListDoing> {
   final List<Widget> pages = [];
-
+  late PageController _pageController;
+  int _currentPageIndex = 0;
+  bool _isQuestionSaved = false;
 
   @override
   void initState() {
+    _pageController = PageController(keepPage: true);
     _getListQuestionWidgets();
     super.initState();
   }
 
   _getListQuestionWidgets() {
     widget.questionsData.forEach((question) {
-      pages.add(QuestionDoingItem(question: question, showAnswer: widget.showAnswer,));
+      pages.add(QuestionDoingItem(question: question, mode: widget.mode,));
+    });
+    _checkQuestionSaved(0);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  _checkQuestionSaved(int index) async {
+    bool isQuestionSaved = await DatabaseHelper().checkExistQuestionSaved(widget.questionsData[index].id);
+    setState(() {
+      _isQuestionSaved = isQuestionSaved;
     });
   }
 
-
-  int _currentPageIndex = 0;
-  final PageController _pageController = PageController(keepPage: true);
+  _toggleQuestionSaved() {
+    int currentQuestionId = widget.questionsData[_currentPageIndex].id;
+    if (_isQuestionSaved) {
+      DatabaseHelper().deleteQuestionSaved(currentQuestionId);
+    } else {
+      DatabaseHelper().addQuestionSaved(currentQuestionId);
+    }
+    setState(() {
+      _isQuestionSaved = !_isQuestionSaved;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Stack(
+    return Scaffold(
+      appBar: AppBar(
+        actions: [
+          if(widget.mode == DoingQuestionMode.review)
+            IconButton(
+              onPressed: _toggleQuestionSaved,
+              icon: Icon(
+                Icons.favorite,
+                size: 40,
+                color: _isQuestionSaved ? Colors.red : null,
+              ),
+            )
+        ],
+      ),
+      body: Stack(
         children: [
           Column(
             children: [
@@ -63,13 +103,13 @@ class _QuestionsListState extends State<QuestionsList> {
                   onPageChanged: (int index) {
                     setState(() {
                       _currentPageIndex = index;
+                      _checkQuestionSaved(index);
                     });
                   },
                 ),
               ),
             ],
           ),
-
           DraggableScrollableSheet(
             initialChildSize: 0.1,
             minChildSize: 0.1,
@@ -82,8 +122,6 @@ class _QuestionsListState extends State<QuestionsList> {
                   height: MediaQuery.of(context).size.height,
                   child: SingleChildScrollView(
                     controller: scrollController,
-                    // Sử dụng ScrollController này cho SingleChildScrollView
-                    // padding: const EdgeInsets.all(10),
                     child: Column(
                       children: [
                         _navigationPageBar(),
@@ -92,8 +130,7 @@ class _QuestionsListState extends State<QuestionsList> {
                           child: GridView.builder(
                             padding: EdgeInsets.all(8),
                             physics: NeverScrollableScrollPhysics(),
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
+                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 6,
                               crossAxisSpacing: 10,
                               mainAxisSpacing: 10,
@@ -114,7 +151,6 @@ class _QuestionsListState extends State<QuestionsList> {
           ),
         ],
       ),
-      // bottomNavigationBar: _navigationPageBar(),
     );
   }
 
@@ -126,7 +162,6 @@ class _QuestionsListState extends State<QuestionsList> {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Hình tròn nền xanh
           Container(
             width: 100,
             height: 100,
@@ -135,7 +170,6 @@ class _QuestionsListState extends State<QuestionsList> {
               shape: BoxShape.circle,
             ),
           ),
-          // Số ở giữa
           Text(
             '${index + 1}',
             style: TextStyle(
@@ -143,7 +177,6 @@ class _QuestionsListState extends State<QuestionsList> {
               color: Colors.white,
             ),
           ),
-
           Positioned(
             top: 0,
             right: 0,
@@ -198,6 +231,7 @@ class _QuestionsListState extends State<QuestionsList> {
     );
   }
 }
+
 
 
 

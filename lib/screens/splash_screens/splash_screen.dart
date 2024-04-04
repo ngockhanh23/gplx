@@ -21,7 +21,6 @@ class SplashScreen extends StatelessWidget {
                 child: Image.asset(
                   'assets/images/logo/logo.png',
                   width: 200,
-                  // height: 200,
                 ),
               ),
             ),

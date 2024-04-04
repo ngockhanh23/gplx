@@ -1,0 +1,4 @@
+enum DoingQuestionMode{
+  review,
+  doingTest
+}

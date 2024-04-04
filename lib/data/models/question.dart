@@ -26,6 +26,21 @@ class Question {
       this.answerExplanation,
       this.isAnswered);
 
+  Question.empty():
+        id = 0,
+        typeQuestion = 0,
+        content = '',
+        photo = '',
+        failingGradeQuestion = false,
+        option1 = '',
+        option2 = '',
+        option3 = '',
+        option4 = '',
+        correctOption = 0,
+        answerExplanation = '',
+        isAnswered = false;
+
+
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -40,7 +55,6 @@ class Question {
       'correctOption': correctOption,
       'answerExplanation': answerExplanation,
       'isAnswered': isAnswered ? 1 : 0,
-
     };
   }
 
@@ -58,7 +72,6 @@ class Question {
       map['correctOption'],
       map['answerExplanation'],
       map['isAnswered'] == 1 ? true : false,
-
     );
   }
 }
