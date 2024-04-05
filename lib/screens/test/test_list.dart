@@ -1,9 +1,40 @@
-import 'package:flutter/material.dart';
-import 'package:gplx/screens/test/test_item.dart';
+import 'dart:math';
 
+import 'package:flutter/material.dart';
+import 'package:gplx/data/helper/database_helper.dart';
+import 'package:gplx/data/models/question.dart';
+import 'package:gplx/screens/test/test_item.dart';
+import 'package:gplx/services/data_services/question_services.dart';
+import 'package:gplx/services/data_services/test_services.dart';
+
+import '../../data/models/test.dart';
 import '../../services/color_services.dart';
 
-class TestList extends StatelessWidget {
+class TestList extends StatefulWidget {
+  @override
+  State<TestList> createState() => _TestListState();
+}
+
+class _TestListState extends State<TestList> {
+
+  List<Test> _lstTests = [];
+
+  @override
+  void initState() {
+    _getTestsList();
+    super.initState();
+  }
+
+  _getTestsList() {
+    DatabaseHelper().getTestsList().then((tests) {
+      setState(() {
+        _lstTests = tests;
+      });
+    });
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -11,28 +42,37 @@ class TestList extends StatelessWidget {
         title: const Text('Thi sát hạch'),
       ),
       body: Padding(
-        padding: EdgeInsets.all(8),
+        padding: const EdgeInsets.all(8),
         child: GridView.builder(
-          itemCount: 5, // Số lượng items, bao gồm cả item mới
+          itemCount: _lstTests.length+1, // Số lượng items, bao gồm cả item mới
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
             mainAxisSpacing: 5,
             crossAxisSpacing: 5,
           ),
           itemBuilder: (BuildContext context, int index) {
-            if (index == 4) {
-
+            if (index == _lstTests.length) {
               return addTestWidget();
             } else {
-              return TestItem();
+              return TestItem(indexTest: index+1, test: _lstTests[index],);
             }
           },
         ),
       ),
     );
   }
+
+
+
   Widget addTestWidget(){
     return InkWell(
+      onTap: () {
+        TestServices().createNewRandomTest().then((_) => {
+              setState(() {
+                _getTestsList();
+              })
+            });
+      },
       child: Card(
         child: Center(
           child: Text(

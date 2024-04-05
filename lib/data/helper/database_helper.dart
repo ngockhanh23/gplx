@@ -1,4 +1,6 @@
 import 'package:gplx/data/models/question_saved.dart';
+import 'package:gplx/data/models/test.dart';
+import 'package:gplx/data/models/test_details.dart';
 import 'package:gplx/data/models/theogry_categories.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -52,6 +54,16 @@ class DatabaseHelper {
     return List.generate(
         maps.length, (index) => TheogryCategories.fromMap(maps[index]));
   }
+
+  Future<List<Question>> getAllQuestions() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps =
+    await db.rawQuery('SELECT * FROM Questions');
+
+    return List.generate(
+        maps.length, (index) => Question.fromMap(maps[index]));
+  }
+
 
   Future<Question?> getQuestionById(int idQuestion) async {
     final db = await database;
@@ -167,6 +179,59 @@ class DatabaseHelper {
     );
     return result.isNotEmpty;
   }
+
+  //Test
+  Future<List<Test>> getTestsList() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps =
+    await db.rawQuery('SELECT * FROM Tests');
+
+    return List.generate(
+        maps.length, (index) => Test.fromMap(maps[index]));
+  }
+
+
+
+  //create new test with list question
+  Future<void> createNewTest(List<Question> lstQuestions) async {
+    final db = await database;
+
+    // Bắt đầu một giao dịch để thêm test và các chi tiết của test
+    await db.transaction((txn) async {
+      // Thêm test mới vào bảng Tests
+      int testId = await txn.insert(
+        'Tests',
+        {'status': 'Bắt đầu',
+          'description' : null,
+          'correctQuestionNumber' : 0,
+          'wrongQuestionNumber' : 0,
+          'time' : 1200
+        },
+      );
+
+      // Thêm các chi tiết của test vào bảng TestDetails
+      for (Question itemQuestion in lstQuestions) {
+        await txn.insert(
+          'TestDetails',
+          {'idTest': testId,
+            'idQuestion': itemQuestion.id,
+            'optionChoosed' : 0
+          },
+        );
+      }
+    });
+  }
+
+  Future<List<TestDetail>> getTestDetailsByTestId(int testID) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+        'SELECT * FROM TestDetails WHERE idTest = ?', [testID]);
+
+    return List.generate(maps.length, (index) {
+      return TestDetail.fromMap(maps[index]);
+    });
+  }
+
 
 
 }

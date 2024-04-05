@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_timer_countdown/flutter_timer_countdown.dart';
 import 'package:gplx/components/questions_list/question_doing_item.dart';
 import 'package:gplx/services/color_services.dart';
 
@@ -12,11 +13,13 @@ import '../../services/enum/enum.dart';
 class QuestionsListDoing extends StatefulWidget {
   List<Question> questionsData;
   DoingQuestionMode mode;
+  int? timeDoingSeconds;
 
   QuestionsListDoing({
     super.key,
     required this.questionsData,
     required this.mode,
+    this.timeDoingSeconds
   });
 
   @override
@@ -67,11 +70,40 @@ class _QuestionsListDoingState extends State<QuestionsListDoing> {
       _isQuestionSaved = !_isQuestionSaved;
     });
   }
+  void handleTimerFinished() {
+
+    print('Thời gian kết thúc');
+  }
 
   @override
   Widget build(BuildContext context) {
+    DateTime endTime = DateTime.now();
+    DateTime now = DateTime.now();
+    int seconds = widget.timeDoingSeconds ?? 0;
+    endTime = now.add(Duration(seconds: seconds));
+
     return Scaffold(
       appBar: AppBar(
+        title: (widget.mode == DoingQuestionMode.doingTest  && widget.timeDoingSeconds != null) ? Row(
+          children: [
+            Text('Còn lại: '),
+            TimerCountdown(
+              format: CountDownTimerFormat.minutesSeconds,
+              enableDescriptions: false,
+              endTime: endTime,
+              onEnd: () {
+                print(seconds);
+                print("Timer finished");
+              },
+              onTick: (duration) {
+                int remainingSeconds = duration.inSeconds;
+                print("Remaining seconds: $remainingSeconds");
+              },
+            ),
+          ],
+        ) : Text(''),
+
+        // centerTitle: true,
         actions: [
           if(widget.mode == DoingQuestionMode.review)
             IconButton(
@@ -88,6 +120,7 @@ class _QuestionsListDoingState extends State<QuestionsListDoing> {
         children: [
           Column(
             children: [
+
               Flexible(
                 flex: 1,
                 child: Text(
