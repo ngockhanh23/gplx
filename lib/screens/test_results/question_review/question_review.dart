@@ -1,96 +1,48 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:gplx/data/helper/database_helper.dart';
-import 'package:gplx/services/color_services.dart';
-import 'package:gplx/services/enum/enum.dart';
-import '../../data/models/question.dart';
-import '../../services/asset_services.dart';
+import 'package:gplx/data/models/question.dart';
 
+import '../../../services/asset_services.dart';
 
-class QuestionDoingItem extends StatefulWidget {
-  Question question;
-  int? choosedOption;
-
-  DoingQuestionMode mode;
-  final Function handleChooseOption;
-
-  QuestionDoingItem(
-      {super.key,
-      required this.question,
-      this.choosedOption,
-      required this.mode,
-      required this.handleChooseOption
-      });
-
-  @override
-  State<QuestionDoingItem> createState() => _QuestionDoingItemState();
-}
-
-class _QuestionDoingItemState extends State<QuestionDoingItem>
-    with AutomaticKeepAliveClientMixin {
-  int? _seletedOption;
-  bool _showAnswerExplain = false;
-
-
-  _handleChooseOption(int optionChoosed){
-    if(!widget.question.isAnswered){
-      DatabaseHelper().updateQuestionAnsweredStatus(widget.question.id);
-    }
-
-   if(widget.mode == DoingQuestionMode.review){
-     if(_seletedOption! == widget.question.correctOption) {
-       _showAnswerExplain = true;
-     } else {
-       _showAnswerExplain = false;
-     }
-   } else {
-     widget.handleChooseOption(widget.question, optionChoosed);
-   }
-
-  }
-
-  @override
-  bool get wantKeepAlive => true;
-
+class QuestionReview extends StatelessWidget{
+  final Question question ;
+  final int optionChoosed ;
+  QuestionReview({super.key, required this.question, required this.optionChoosed});
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            widget.question.content,
-            style: const TextStyle(fontSize: 25),
-          ),
-          if(widget.question.failingGradeQuestion)
-            const Text(
-              'Đây là câu điểm liệt',
-              style: TextStyle(fontSize: 20, color: Colors.orange),
+    // TODO: implement build
+    return Scaffold(
+      appBar: AppBar(),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              question.content,
+              style: const TextStyle(fontSize: 25),
             ),
-          if (widget.question.photo.isNotEmpty)
-            Container(
-              decoration:
-                  BoxDecoration(borderRadius: BorderRadius.circular(10)),
-              child: Image.asset(AssetServices.assetQuestionImagesPath +
-                  widget.question.photo),
+            if(question.failingGradeQuestion)
+              const Text(
+                'Đây là câu điểm liệt',
+                style: TextStyle(fontSize: 20, color: Colors.orange),
+              ),
+            if (question.photo.isNotEmpty)
+              Container(
+                decoration:
+                BoxDecoration(borderRadius: BorderRadius.circular(10)),
+                child: Image.asset(AssetServices.assetQuestionImagesPath +
+                    question.photo),
+              ),
+            const SizedBox(
+              height: 20,
             ),
-          const SizedBox(
-            height: 20,
-          ),
-          if (widget.question.option1.isNotEmpty)
-            InkWell(
-              onTap: () {
-                setState(() {
-                  _seletedOption = 1;
-                  _handleChooseOption(1);
-                });
-              },
-              child: Container(
+            if (question.option1.isNotEmpty)
+              Container(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
-                  color: (widget.mode == DoingQuestionMode.review && _seletedOption ==1) ? (_seletedOption == widget.question.correctOption ? Colors.greenAccent : Colors.redAccent) : Colors.transparent,
-                  border: Border(
+                  color: (optionChoosed == 1 && optionChoosed != question.correctOption) ? Colors.red : ((question.correctOption == 1) ? Colors.green : Colors.transparent),
+                  border: const Border(
                     top: BorderSide(width: 0.5, color: Colors.black12),
                     bottom: BorderSide(width: 0.5, color: Colors.black12),
                   ),
@@ -104,16 +56,14 @@ class _QuestionDoingItemState extends State<QuestionDoingItem>
                           width: 30,
                           height: 30,
                           decoration: BoxDecoration(
-                            color: _seletedOption == 1 ? ColorServices.primaryColor : Colors.transparent,
                             shape: BoxShape.circle,
                             border: Border.all(color: Colors.grey),
                           ),
                         ),
-                        Text(
+                        const Text(
                           '1',
                           style: TextStyle(
                             fontSize: 20,
-                            color: _seletedOption == 1 ? Colors.white : Colors.black,
                           ),
                         ),
                       ],
@@ -123,10 +73,11 @@ class _QuestionDoingItemState extends State<QuestionDoingItem>
                     ),
                     Expanded(
                       child: Text(
-                        widget.question.option1,
+                        question.option1,
                         maxLines: 8,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 20,
+                          color: (optionChoosed == 1 && optionChoosed != question.correctOption) ? Colors.white : Colors.black,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -134,22 +85,13 @@ class _QuestionDoingItemState extends State<QuestionDoingItem>
                   ],
                 ),
               ),
-            ),
 
-          if (widget.question.option2.isNotEmpty)
-            InkWell(
-              onTap: () {
-                setState(() {
-                  _seletedOption = 2;
-                  _handleChooseOption(2);
-                });
-              },
-              child: Container(
+            if (question.option2.isNotEmpty)
+              Container(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
-                  color: (widget.mode == DoingQuestionMode.review && _seletedOption ==2) ? (_seletedOption == widget.question.correctOption ? Colors.greenAccent : Colors.redAccent) : Colors.transparent,
-
-                  border: Border(
+                  color: (optionChoosed == 2 && optionChoosed != question.correctOption) ? Colors.red : ((question.correctOption == 2) ? Colors.green : Colors.transparent),
+                  border: const Border(
                     top: BorderSide(width: 0.5, color: Colors.black12),
                     bottom: BorderSide(width: 0.5, color: Colors.black12),
                   ),
@@ -163,16 +105,14 @@ class _QuestionDoingItemState extends State<QuestionDoingItem>
                           width: 30,
                           height: 30,
                           decoration: BoxDecoration(
-                            color: _seletedOption == 2 ? ColorServices.primaryColor : Colors.transparent,
                             shape: BoxShape.circle,
                             border: Border.all(color: Colors.grey),
                           ),
                         ),
-                        Text(
+                        const Text(
                           '2',
                           style: TextStyle(
                             fontSize: 20,
-                            color: _seletedOption == 2 ? Colors.white : Colors.black,
                           ),
                         ),
                       ],
@@ -182,10 +122,11 @@ class _QuestionDoingItemState extends State<QuestionDoingItem>
                     ),
                     Expanded(
                       child: Text(
-                        widget.question.option2,
+                        question.option2,
                         maxLines: 8,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 20,
+                          color: (optionChoosed == 2 && optionChoosed != question.correctOption) ? Colors.white : Colors.black,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -193,21 +134,14 @@ class _QuestionDoingItemState extends State<QuestionDoingItem>
                   ],
                 ),
               ),
-            ),
-          if (widget.question.option3.isNotEmpty)
-            InkWell(
-              onTap: () {
-                setState(() {
-                  _seletedOption = 3;
-                  _handleChooseOption(3);
-                });
-              },
-              child: Container(
+
+            if (question.option3.isNotEmpty)
+              Container(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
-                  color: (widget.mode == DoingQuestionMode.review && _seletedOption ==3) ? (_seletedOption == widget.question.correctOption ? Colors.greenAccent : Colors.redAccent) : Colors.transparent,
+                  color: (optionChoosed == 3 && optionChoosed != question.correctOption) ? Colors.red : ((question.correctOption == 3) ? Colors.green : Colors.transparent),
 
-                  border: Border(
+                  border: const Border(
                     top: BorderSide(width: 0.5, color: Colors.black12),
                     bottom: BorderSide(width: 0.5, color: Colors.black12),
                   ),
@@ -221,16 +155,14 @@ class _QuestionDoingItemState extends State<QuestionDoingItem>
                           width: 30,
                           height: 30,
                           decoration: BoxDecoration(
-                            color: _seletedOption == 3 ? ColorServices.primaryColor : Colors.transparent,
                             shape: BoxShape.circle,
                             border: Border.all(color: Colors.grey),
                           ),
                         ),
-                        Text(
+                        const Text(
                           '3',
                           style: TextStyle(
                             fontSize: 20,
-                            color: _seletedOption == 3 ? Colors.white : Colors.black,
                           ),
                         ),
                       ],
@@ -240,10 +172,11 @@ class _QuestionDoingItemState extends State<QuestionDoingItem>
                     ),
                     Expanded(
                       child: Text(
-                        widget.question.option3,
+                        question.option3,
                         maxLines: 8,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 20,
+                          color: (optionChoosed == 3 && optionChoosed != question.correctOption) ? Colors.white : Colors.black,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -251,21 +184,13 @@ class _QuestionDoingItemState extends State<QuestionDoingItem>
                   ],
                 ),
               ),
-            ),
-          if (widget.question.option4.isNotEmpty)
-            InkWell(
-              onTap: () {
-                setState(() {
-                  _seletedOption = 4;
-                  _handleChooseOption(4);
-                });
-              },
-              child: Container(
+
+            if (question.option4.isNotEmpty)
+              Container(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
-                  color: (widget.mode == DoingQuestionMode.review && _seletedOption ==4) ? (_seletedOption == widget.question.correctOption ? Colors.greenAccent : Colors.redAccent) : Colors.transparent,
-
-                  border: Border(
+                  color: (optionChoosed == 4 && optionChoosed != question.correctOption) ? Colors.red : ((question.correctOption == 4) ? Colors.green : Colors.transparent),
+                  border: const Border(
                     top: BorderSide(width: 0.5, color: Colors.black12),
                     bottom: BorderSide(width: 0.5, color: Colors.black12),
                   ),
@@ -279,16 +204,14 @@ class _QuestionDoingItemState extends State<QuestionDoingItem>
                           width: 30,
                           height: 30,
                           decoration: BoxDecoration(
-                            color: _seletedOption == 4 ? ColorServices.primaryColor : Colors.transparent,
                             shape: BoxShape.circle,
                             border: Border.all(color: Colors.grey),
                           ),
                         ),
-                        Text(
+                        const Text(
                           '4',
                           style: TextStyle(
                             fontSize: 20,
-                            color: _seletedOption == 4 ? Colors.white : Colors.black,
                           ),
                         ),
                       ],
@@ -298,10 +221,11 @@ class _QuestionDoingItemState extends State<QuestionDoingItem>
                     ),
                     Expanded(
                       child: Text(
-                        widget.question.option4,
+                        question.option4,
                         maxLines: 8,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 20,
+                          color: (optionChoosed == 4 && optionChoosed != question.correctOption) ? Colors.white : Colors.black,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -309,17 +233,9 @@ class _QuestionDoingItemState extends State<QuestionDoingItem>
                   ],
                 ),
               ),
-            ),
-          const SizedBox(height: 30,),
 
-          _showAnswerExplain ? Card(
-            color: Colors.greenAccent,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text('Giải thích: '+widget.question.answerExplanation, style: const TextStyle(fontSize: 20),),
-            ),
-          ) : Container()
-        ],
+          ],
+        ),
       ),
     );
   }

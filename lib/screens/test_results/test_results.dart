@@ -1,17 +1,75 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:gplx/data/helper/database_helper.dart';
+import 'package:gplx/data/models/test.dart';
 import 'package:gplx/screens/doing_test/doing_test.dart';
 import 'package:gplx/screens/test_results/score_details/score_details.dart';
 
+import '../../components/questions_list/questions_list.dart';
+import '../../data/models/question.dart';
+import '../../data/models/test_details.dart';
 import '../../services/color_services.dart';
+import '../../services/enum/enum.dart';
 
 class TestResults extends StatelessWidget{
+  final Test test;
+  const TestResults({super.key, required this.test});
+
+
+  _resetTestProgess(BuildContext context) async {
+    await DatabaseHelper().resetTestProgress(test.id).then((test) async {
+      List<Question> lstQuestionTest = [];
+
+      // Lấy danh sách các chi tiết bài kiểm tra từ cơ sở dữ liệu
+      List<TestDetail> testDetails = await DatabaseHelper().getTestDetailsByTestId(test!.id);
+
+      // Lặp qua từng chi tiết bài kiểm tra và lấy câu hỏi tương ứng từ cơ sở dữ liệu
+      for (TestDetail testDetail in testDetails) {
+        Question? question = await DatabaseHelper().getQuestionById(testDetail.idQuestion);
+
+        if (question != null) {
+          lstQuestionTest.add(question);
+        }
+      }
+
+      // Chuyển sang màn hình làm bài kiểm tra và truyền các tham số cần thiết
+      await Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => QuestionsListDoing(
+            questionsData: lstQuestionTest,
+            mode: DoingQuestionMode.doingTest,
+            timeDoingSeconds: test.time,
+            testId: test.id,
+            // initialPageIndex: 3,
+          ),
+        ),
+      );
+
+      // Sau khi màn hình mới đóng lại, cập nhật lại trạng thái của bài kiểm tra
+      // Test? updatedTest = await DatabaseHelper().getTestById(test.id);
+      // if (updatedTest != null) {
+      //   // Gọi setState() để cập nhật trạng thái của widget.test
+      //   Navigator.pushReplacement(
+      //     context,
+      //     MaterialPageRoute(
+      //       builder: (context) => TestResults(test: updatedTest),
+      //     ),
+      //   );
+      // }
+    });
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return Scaffold(
+      appBar: AppBar(),
       body: Padding(
-        padding: EdgeInsets.all(8),
+        padding: const EdgeInsets.all(8),
         child: SingleChildScrollView(
           child: Column(
             // mainAxisAlignment: MainAxisAlignment.center,
@@ -36,7 +94,7 @@ class TestResults extends StatelessWidget{
                                 height: 200,
                                 padding: EdgeInsets.all(10),
                                 child: CircularProgressIndicator(
-                                  value: 8/25,
+                                  value: test.correctQuestionNumber/25,
                                   strokeWidth: 14,
                                   backgroundColor: Colors.black26,
                                   color: ColorServices.primaryColor,
@@ -48,7 +106,7 @@ class TestResults extends StatelessWidget{
                                   child: Column(
                                     children: [
                                       Text(
-                                        '16%',
+                                        '${(test.correctQuestionNumber / 25 * 100).toStringAsFixed(0)}%',
                                         style: TextStyle(
                                             fontSize: 40,
                                             color: ColorServices.primaryColor
@@ -62,10 +120,10 @@ class TestResults extends StatelessWidget{
                           ),
                         ),
                       ),
-                      Text("Số câu trả lời đúng: 19/25", style: TextStyle(fontSize: 25),),
+                      Text("Số câu trả lời đúng: ${test.correctQuestionNumber}/25", style: TextStyle(fontSize: 25),),
                       const SizedBox(height: 20,),
-                      Text("TRƯỢT", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Colors.redAccent),),
-                      Text("(Sai câu điểm liệt)", style: TextStyle(fontSize: 20, color: Colors.grey),)
+                      Text(test.status, style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Colors.redAccent),),
+                      Text("(${test.description})", style: TextStyle(fontSize: 20, color: Colors.grey),)
                     ],
                   ),
                 ),
@@ -90,24 +148,24 @@ class TestResults extends StatelessWidget{
                                   Text("Số câu đúng:", style: TextStyle(fontSize: 20),),
                                   Text("Số câu sai:", style: TextStyle(fontSize: 20),),
                                   Text("Số câu điểm liệt sai:", style: TextStyle(fontSize: 20),),
-                                  Text("Thời gian làm bài:", style: TextStyle(fontSize: 20),),
+                                  // Text("Thời gian làm bài:", style: TextStyle(fontSize: 20),),
                                 ],
                               ),
                               const SizedBox( width: 10,),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text("19/25", style: TextStyle(fontSize: 20, color: ColorServices.primaryColor),),
-                                  Text("30", style: TextStyle(fontSize: 20, color: ColorServices.primaryColor),),
-                                  Text("2", style: TextStyle(fontSize: 20, color: ColorServices.primaryColor),),
-                                  Text("20 phút", style: TextStyle(fontSize: 20, color: ColorServices.primaryColor),),
+                                  Text('${test.correctQuestionNumber}/25', style: TextStyle(fontSize: 20, color: ColorServices.primaryColor),),
+                                  Text('${test.wrongQuestionNumber}', style: TextStyle(fontSize: 20, color: ColorServices.primaryColor),),
+                                  Text('${test.fallingGradeQuestionNumber}', style: TextStyle(fontSize: 20, color: ColorServices.primaryColor),),
+                                  // Text("20 phút", style: TextStyle(fontSize: 20, color: ColorServices.primaryColor),),
                                 ],
                               )
                             ],
                           ),
                         ),
                         const Divider(thickness: 0.5,),
-                        Container(height:300,child: ScoreDetails())
+                        SizedBox(height:500,child: ScoreDetails(testID: test.id,))
                       ],
                     ),
                   ),
@@ -146,7 +204,8 @@ class TestResults extends StatelessWidget{
                 flex: 4,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => DoingTest()));
+                    // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => DoingTest()));
+                    _resetTestProgess(context);
                   },
                   child: Text(
                     "Làm lại",

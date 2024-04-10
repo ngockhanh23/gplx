@@ -191,6 +191,32 @@ class DatabaseHelper {
   }
 
 
+  Future<Test?> getTestById(int testId) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'Tests',
+      where: 'id = ?',
+      whereArgs: [testId],
+    );
+
+    if (maps.isEmpty) {
+      return null;
+    }
+
+    final map = maps.first;
+    return Test(
+      map['id'] ?? 0,
+      map['status'] ?? '',
+      map['description'] ?? '',
+      map['correctQuestionNumber'] ?? 0,
+      map['wrongQuestionNumber'] ?? 0,
+      map['fallingGradeQuestionNumber'] ?? 0,
+      map['time'] ?? 0,
+    );
+  }
+
+
+
 
   //create new test with list question
   Future<void> createNewTest(List<Question> lstQuestions) async {
@@ -201,10 +227,11 @@ class DatabaseHelper {
       // Thêm test mới vào bảng Tests
       int testId = await txn.insert(
         'Tests',
-        {'status': 'Bắt đầu',
+        {'status': 'BD',
           'description' : null,
           'correctQuestionNumber' : 0,
           'wrongQuestionNumber' : 0,
+          'fallingGradeQuestionNumber' : 0,
           'time' : 1200
         },
       );
@@ -221,6 +248,31 @@ class DatabaseHelper {
       }
     });
   }
+  Future<void> updateTest(Test test) async {
+    final db = await database;
+    await db.update(
+      'Tests',
+      test.toMap(),
+      where: 'id = ?',
+      whereArgs: [test.id],
+    );
+  }
+
+
+  Future<void> updateTestDetail(int idTest, int idQuestion, int choosedOption) async {
+    final db = await database;
+    await db.update(
+      'TestDetails',
+      {
+        'idTest' : idTest,
+        'idQuestion' : idQuestion,
+        'optionChoosed' : choosedOption
+      },
+      where: 'idTest = ? AND idQuestion = ?',
+      whereArgs: [idTest, idQuestion],
+    );
+  }
+
 
   Future<List<TestDetail>> getTestDetailsByTestId(int testID) async {
     final db = await database;
@@ -231,6 +283,50 @@ class DatabaseHelper {
       return TestDetail.fromMap(maps[index]);
     });
   }
+
+  Future<Test?> resetTestProgress(int testID) async {
+    // final db = await database;
+
+    Test? test = await getTestById(testID);
+
+    if (test != null) {
+      test.status = 'BD';
+      test.correctQuestionNumber = 0;
+      test.wrongQuestionNumber = 0;
+      test.fallingGradeQuestionNumber = 0;
+      test.time = 1200;
+      await updateTest(test);
+
+
+      List<TestDetail> testDetails = await getTestDetailsByTestId(testID);
+
+      for (TestDetail detail in testDetails) {
+        detail.optionChoosed = 0;
+        await updateTestDetail(detail.idTest, detail.idQuestion, detail.optionChoosed);
+      }
+      return test;
+
+    }
+    return test;
+  }
+
+  Future<int> getCorrectQuestionNumberByTestId(int testID) async {
+    final db = await database;
+
+    // Truy vấn SQL để đếm số lượng câu hỏi có optionChoosed trùng với correctOption của câu hỏi
+    final List<Map<String, dynamic>> result = await db.rawQuery('''
+    SELECT COUNT(*) AS correctQuestionNumber
+    FROM TestDetails AS td
+    INNER JOIN Questions AS q ON td.idQuestion = q.id
+    WHERE td.idTest = ? AND td.optionChoosed = q.correctOption
+    ''', [testID]);
+
+    // Lấy số lượng câu hỏi đúng từ kết quả truy vấn
+    final int correctQuestionNumber = Sqflite.firstIntValue(result) ?? 0;
+
+    return correctQuestionNumber;
+  }
+
 
 
 
