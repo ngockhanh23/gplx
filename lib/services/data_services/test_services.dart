@@ -4,7 +4,7 @@ import 'package:gplx/services/data_services/question_services.dart';
 
 class TestServices{
   Future<void> createNewRandomTest() async{
-    List<Question> lstAllQuestions = await DatabaseHelper().getAllQuestions();
+    List<Question> lstAllQuestions = await DatabaseHelper().getListQuestions();
 
     List<Question> lstRandomQuestions = QuestionServices().generateRandomQuestions(lstAllQuestions);
 

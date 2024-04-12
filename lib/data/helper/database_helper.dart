@@ -57,7 +57,7 @@ class DatabaseHelper {
         maps.length, (index) => TheogryCategories.fromMap(maps[index]));
   }
 
-  Future<List<Question>> getAllQuestions() async {
+  Future<List<Question>> getListQuestions() async {
     final db = await database;
     final List<Map<String, dynamic>> maps =
     await db.rawQuery('SELECT * FROM Questions');
@@ -356,6 +356,11 @@ class DatabaseHelper {
     });
   }
 
-
-
+  Future<List<TrafficSigns>> getTrafficSignsList() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps =
+    await db.rawQuery('SELECT * FROM TrafficSigns');
+    return List.generate(
+        maps.length, (index) => TrafficSigns.fromMap(maps[index]));
+  }
 }
