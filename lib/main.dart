@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gplx/screens/laws/laws.dart';
 import 'package:gplx/screens/learning_theogry/learning_theogry.dart';
 import 'package:gplx/screens/main_screens/main_screens.dart';
+import 'package:gplx/screens/signs_learning/signs_learning.dart';
 import 'package:gplx/screens/splash_screens/splash_screen.dart';
 import 'package:gplx/screens/test/test_list.dart';
 import 'package:gplx/screens/test_tips/test_tips.dart';
@@ -38,8 +39,8 @@ class MyApp extends StatelessWidget {
         '/learning-theogry' : (context) => LearningTheogry(),
         '/test' : (context) => TestList(),
         '/test-tips' : (context) => TestTips(),
-        '/test-tips' : (context) => TestTips(),
-        '/signs-learning' : (context) => TestTips(),
+
+        '/signs-learning' : (context) => SignsLearning(),
         '/laws' : (context) => Laws(),
         '/wrong-questions' : (context) => WrongQuestions(),
       },

@@ -68,6 +68,7 @@ flutter:
     - assets/images/icon_png/
     - assets/images/theogry_img_icons/
     - assets/images/question_images/
+    - assets/images/traffic_signs/
     - assets/data_assets/
 
 

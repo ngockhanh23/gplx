@@ -2,6 +2,8 @@ import 'package:gplx/data/models/question_saved.dart';
 import 'package:gplx/data/models/test.dart';
 import 'package:gplx/data/models/test_details.dart';
 import 'package:gplx/data/models/theogry_categories.dart';
+import 'package:gplx/data/models/traffic_signs.dart';
+import 'package:gplx/data/models/traffic_signs_categories.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -327,6 +329,32 @@ class DatabaseHelper {
     return correctQuestionNumber;
   }
 
+  Future<List<TrafficSignsCategories>> getTrafficSignsCategoryList() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps =
+    await db.rawQuery('SELECT * FROM TrafficSignsCategory');
+
+    return List.generate(
+        maps.length, (index) => TrafficSignsCategories.fromMap(maps[index]));
+  }
+
+
+  Future<List<TrafficSigns>> getListTrafficSignsByType(int type) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+        'SELECT * FROM TrafficSigns WHERE type = ?', [type]);
+
+    return List.generate(maps.length, (index) {
+      final map = maps[index];
+      return TrafficSigns(
+        map['id'] ?? 0,
+        map['images'] ?? '',
+        map['title'] ?? '',
+        map['description'] ?? '',
+        map['type'] ?? 0,
+      );
+    });
+  }
 
 
 

@@ -291,42 +291,22 @@ class _QuestionsListDoingState extends State<QuestionsListDoing> {
       onTap: () {
         _pageController.jumpToPage(index);
       },
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Container(
-            width: 100,
-            height: 100,
-            decoration: const BoxDecoration(
-              color: Colors.green,
-              shape: BoxShape.circle,
-            ),
-          ),
-          Text(
+      child: Container(
+        width: 100,
+        height: 100,
+        decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+            border: Border.all(width: _currentPageIndex == index ? 5 : 1, color: _currentPageIndex == index ? ColorServices.primaryColor : Colors.grey)),
+        child: Center(
+          child: Text(
             '${index + 1}',
             style: const TextStyle(
               fontSize: 24,
-              color: Colors.white,
+              // color: Colors.bl,
             ),
           ),
-          Positioned(
-            top: 0,
-            right: 0,
-            child: Container(
-              width: 24,
-              height: 24,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: Color(0xFF007903),
-              ),
-              child: const Icon(
-                Icons.check,
-                color: Colors.white,
-                size: 18,
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

@@ -33,11 +33,12 @@ class _QuestionDoingItemState extends State<QuestionDoingItem>
 
 
   _handleChooseOption(int optionChoosed){
-    if(!widget.question.isAnswered){
-      DatabaseHelper().updateQuestionAnsweredStatus(widget.question.id);
-    }
+
 
    if(widget.mode == DoingQuestionMode.review){
+     if(!widget.question.isAnswered){
+       DatabaseHelper().updateQuestionAnsweredStatus(widget.question.id);
+     }
      if(_seletedOption! == widget.question.correctOption) {
        _showAnswerExplain = true;
      } else {
